@@ -5,11 +5,13 @@ import requests
 CHAR_WINDOW = 'https://pathofexile.com/character-window/'
 BASE_URL = 'https://pathofexile.com'
 
+
 class PoeData:
     """
     Small Wrapper to retrieve specific info from the given API.
     - Big thanks to: https://app.swaggerhub.com/apis/Chuanhsing/poe/1.0.0#/
     """
+
     def __init__(self, cookie=None):
         if cookie:
             self._cookies = {
@@ -19,11 +21,11 @@ class PoeData:
             self._cookies = {}
 
     def get_race_seasons(self):
-        url_race_seasons='/api/seasons'
+        url_race_seasons = '/api/seasons'
         return requests.get(BASE_URL + url_race_seasons, cookies=self._cookies).json()
 
-    def get_leagues(self,type='main',compact=1,limit=10,offset=0):
-        url_leagues='/api/leagues'
+    def get_leagues(self, type='main', compact=1, limit=10, offset=0):
+        url_leagues = '/api/leagues'
         payload = {
             'type': type,
             'compat': compact,
@@ -31,7 +33,6 @@ class PoeData:
             'offset': offset
         }
         return requests.get(BASE_URL + url_leagues, params=payload, cookies=self._cookies).json()
-
 
     def get_mtx_info(self, league=None, sortOrder='asc', tabs=0):
         url_stash = 'get-mtx-stash-items'
@@ -84,3 +85,33 @@ class PoeData:
         url_chars = "get-characters"
         payload = {'accountName': accountName}
         return requests.post(CHAR_WINDOW + url_chars, data=payload, cookies=self._cookies).json()
+
+    def get_trade_leagues(self):
+        """
+        Get all active trade leagues with their id.
+        :return: json response with the character list
+        """
+        url = '/api/trade/data/leagues'
+        return requests.post(BASE_URL + url, cookies=self._cookies).json()
+
+    def get_league_info(self, league_name: str, ladder: bool = False, ladder_limit: int = 20, ladder_offset: int = 0,
+                        ladder_track: bool = False):
+        """
+        Get infos about the current leage
+        :param league_name: str - name of the league
+        :param ladder:  bool - show the ladder too, default is false
+        :param ladder_limit: int - limit the ladder to an amount of responses. maximum is 200, default is 20
+        :param ladder_offset: int - offset for pagination default is 0
+        :param ladder_track: bool - include unique IDs for each char
+        :return:
+        """
+        url = '/api/leagues/' + league_name
+        payload = {
+            'ladderTrack': int(ladder_track),
+            'ladder': int(ladder),
+            'ladderLimit': ladder_limit,
+            'ladderOffset': ladder_offset,
+        }
+        response = requests.post(BASE_URL + url, params=payload, cookies=self._cookies)
+        print(response.url)
+        return response.json()
