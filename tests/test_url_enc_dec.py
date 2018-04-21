@@ -7,7 +7,7 @@ from src.core import PoeData
 
 import unittest
 
-from src.util.tree import encode_hashes, decode_url
+from src.util.tree_codec import encode_hashes, decode_url
 
 url = 'AAAABAMDAQQHBLMGSQj0Dc0OPA5cES0UIBRxFScWbxhWGF0YkRo4HM4c3CSqJy8o-itQLJwy0TWSNuk6UjpYOuE8LUGHRARFR0V-RZ1Ms025TeNQR' \
       '1NSVcZZ81qRXz9mnmebaGVodGpDaqxq-mvbcg9yqXasfIN99YIHgseDX4PMg9uFYIhAjLGOvo8akDOQVZLBmK2a4JuKogCmV6asqH2qxKyYrKqtja' \

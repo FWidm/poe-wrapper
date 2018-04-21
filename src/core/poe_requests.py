@@ -6,16 +6,16 @@ CHAR_WINDOW = 'https://pathofexile.com/character-window/'
 BASE_URL = 'https://pathofexile.com'
 
 
-class PoeData:
+class PoeRequests:
     """
     Small Wrapper to retrieve specific info from the given API.
     - Big thanks to: https://app.swaggerhub.com/apis/Chuanhsing/poe/1.0.0#/
     """
 
-    def __init__(self, cookie=None):
-        if cookie:
+    def __init__(self, session_id=None):
+        if session_id:
             self._cookies = {
-                'POESESSID': cookie
+                'POESESSID': session_id
             }
         else:
             self._cookies = {}
@@ -72,6 +72,7 @@ class PoeData:
         url_items = 'get-items'
         payload = {'accountName': accountName, 'character': charName}
         skills = requests.post(CHAR_WINDOW + url_skills, data=payload, cookies=self._cookies).json()
+        skills['jewels']=skills['items']
         items = requests.post(CHAR_WINDOW + url_items, data=payload, cookies=self._cookies).json()
         skills.update(items)
         return skills
