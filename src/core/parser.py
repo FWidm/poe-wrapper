@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from src.core.poe_requests import PoeRequests
 from src.models.item import Item
 from src.util import tree_codec
@@ -8,10 +10,17 @@ class CharacterParser():
     def __init__(self, account_name: str, character_name: str, session_id: str = None):
         self.poe_requests = PoeRequests(session_id)
         self.account_name = account_name
-        raw_character = self.poe_requests.get_char_info(account_name, character_name)
+        self.character_name =character_name
+        self.timestamp = datetime.now()
+        self.update()
+
+    def update(self):
+        raw_character = self.poe_requests.get_char_info(self.account_name, self.character_name)
         self.tree_payload = self.__parse_payload(raw_character)
         self.items, self.jewels = self.__parse_items(raw_character)
         self.character = raw_character[CharacterKeys.CHARACTER.value]
+        self.timestamp = datetime.now()
+
 
     def __repr__(self):
         return "{}".format(self.__dict__)
@@ -43,3 +52,6 @@ class CharacterParser():
                 item_dict[item.slot]=[]
             item_dict[item.slot].append(item)
         return item_dict
+
+    def get_hash(self)->str:
+        pass
