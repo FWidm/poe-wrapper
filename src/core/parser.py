@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from src.core.poe_requests import PoeRequests
 from src.models.item import Item
@@ -10,7 +11,7 @@ class CharacterParser():
     def __init__(self, account_name: str, character_name: str, session_id: str = None):
         self.poe_requests = PoeRequests(session_id)
         self.account_name = account_name
-        self.character_name =character_name
+        self.character_name = character_name
         self.timestamp = datetime.now()
         self.update()
 
@@ -21,12 +22,11 @@ class CharacterParser():
         self.character = raw_character[CharacterKeys.CHARACTER.value]
         self.timestamp = datetime.now()
 
-
     def __repr__(self):
         return "{}".format(self.__dict__)
 
     @staticmethod
-    def __parse_items(raw_character):
+    def __parse_items(raw_character) -> (List[Item],List[Item]):
         jewels = raw_character[CharacterKeys.JEWELS.value]
         raw_items = raw_character[CharacterKeys.ITEMS.value]
         item_list = []
@@ -45,13 +45,27 @@ class CharacterParser():
         return tree_codec.encode_hashes(4, char[CharacterFieldKeys.CLASS_ID.value],
                                         char[CharacterFieldKeys.ASCENDENCY_CLASS_ID.value], 0, hashes)
 
-    def get_items_dict(self)->dict:
+    def get_items_dict(self) -> dict:
         item_dict = {}
         for item in self.items:
             if not item_dict.get(item.slot):
-                item_dict[item.slot]=[]
+                item_dict[item.slot] = []
             item_dict[item.slot].append(item)
         return item_dict
 
-    def get_hash(self)->str:
-        pass
+    def __eq__(self, other):
+        if other==None:
+            return False
+        if self.character_name!=other.character_name:
+
+            return False
+        if self.character != other.character:
+            return False
+        if self.items != other.items:
+            return False
+        if self.jewels != other.jewels:
+            return False
+        return True
+
+    def __ne__(self,other):
+        return not self.__eq__(other)

@@ -58,3 +58,16 @@ class Item:
 
     def __repr__(self):
         return self.name if self.slot != 'Flask' and self.slot != 'MainInventory' and self.frame_type != 0 else self.type
+
+    def __eq__(self, other):
+        print(self,other)
+        if self.name != other.name:
+            return False
+        # todo: add sockets here - links & colors if needed
+        if self.frame_type != other.frame_type:
+            return False
+
+        return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
