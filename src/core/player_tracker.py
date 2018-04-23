@@ -5,23 +5,25 @@ import copy
 
 import logging
 
+import math
+
+import time
+
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
+
 from src.core.parser import CharacterParser
-from src.util.scheduler import Scheduler
 
 
 class PlayerTracker():
     def __init__(self):
         self.char_parsers: List[CharacterParser] = []
-        # loop = asyncio.new_event_loop()
-        # loop.set_debug(True)
-        # logging.basicConfig(level=logging.DEBUG)
-        # self.scheduler = Scheduler(loop=loop)
-        # self.scheduler.schedule(self.fetch_chars())
-        # self.loop.run_forever()
         self.snapshots = {}
 
     def add_character(self, account: str, character: str):
-        self.char_parsers.append(CharacterParser(account, character))
+        parser = CharacterParser(account, character)
+        self.char_parsers.append(parser)
+        self._create_snapshot(parser)
         print(self.char_parsers)
 
     def remove_character(self, account: str, character: str):
@@ -33,18 +35,27 @@ class PlayerTracker():
         for parser in self.char_parsers:
             self.fetch_char(parser)
 
-    def fetch_char(self, parser: CharacterParser):
-        parser.update()
+    def _create_snapshot(self, parser):
         snapshot_list = self.snapshots.get(parser.character_name)
         if not snapshot_list:
             self.snapshots[parser.character_name] = []
         self.snapshots[parser.character_name].append(copy.deepcopy(parser))
 
+    def fetch_char(self, parser: CharacterParser):
+        parser.update()
+        self._create_snapshot(parser)
 
-pt = PlayerTracker()
-pt.add_character('FaustVIII', 'FromDeadToWorse')
-pt.fetch_chars()
-pt.fetch_chars()
-pt.fetch_chars()
-print(pt.snapshots)
-pt.remove_character('FaustVIII', 'FromDeadToWorse')
+    def get_snapshots(self):
+        print(len(self.snapshots))
+
+
+if __name__ == '__main__':
+    pt = PlayerTracker()
+    pt.add_character('FaustVIII', 'FromDeadToWorse')
+    scheduler = BlockingScheduler()
+    scheduler.add_job(pt.fetch_chars, 'interval', seconds=10)
+    scheduler.add_job(pt.get_snapshots, 'interval', seconds=5)
+    try:
+        scheduler.start()
+    except (KeyboardInterrupt, SystemExit):
+        pass
