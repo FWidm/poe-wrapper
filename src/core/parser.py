@@ -56,8 +56,9 @@ class CharacterParser():
     def __eq__(self, other):
         if other==None:
             return False
+        if self.tree_payload != other.tree_payload:
+            return False
         if self.character_name!=other.character_name:
-
             return False
         if self.character != other.character:
             return False
@@ -65,6 +66,8 @@ class CharacterParser():
             return False
         if self.jewels != other.jewels:
             return False
+
+
         return True
 
     def __ne__(self,other):

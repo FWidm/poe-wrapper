@@ -53,7 +53,7 @@ if __name__ == '__main__':
     pt = PlayerTracker()
     pt.add_character('FaustVIII', 'FromDeadToWorse')
     scheduler = BackgroundScheduler()
-    scheduler.add_job(pt.fetch_chars, 'interval', seconds=30)
+    scheduler.add_job(pt.fetch_chars, 'interval', seconds=10)
     # scheduler.add_job(pt.get_snapshots, 'interval', seconds=1)
     scheduler.start()
     try:

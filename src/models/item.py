@@ -28,6 +28,8 @@ class Item:
         self.slot = kwargs.get('slot')
         # list of items
         self.socketed_items = kwargs.get('socketed_items')
+        self.implicit_mods = kwargs.get('implicit_mods')
+        self.type_line = kwargs.get('type_line')
 
     @staticmethod
     def from_dict(item_dict):
@@ -53,21 +55,74 @@ class Item:
             y=item_dict.get('y'),
             slot=item_dict.get('inventoryId'),
             socketed_items=item_dict.get('socketedItems'),
+            implicit_mods=item_dict.get('implicitMods'),
+
         )
         return item
 
+    def get_linked_sockets(self) -> dict:
+        """
+        Get the links of an item in the form of a dict with socket groups as key and a list of characters as socket colors
+        :return: dictionary in the style of {0:[RRB],1:[BBB]} for an item with 6 sockets and 2 three links.
+        """
+        links = {}
+        if not self.sockets:
+            return links
+
+        for socket in self.sockets:
+            group = socket['group']
+            if not links.get(group):
+                links[group] = []
+            links[group].append(socket['sColour'])
+        return links
+
+    def get_gems(self):
+        """
+        Get all socketed gems in the correct order.
+        :return: List[Item] list of socketed gems in this item
+        """
+        gems = []
+        for raw_gem in self.socketed_items:
+            gem = Item.from_dict(raw_gem)
+            gems.append(gem)
+        return gems
+
     def __repr__(self):
-        return self.name if self.slot != 'Flask' and self.slot != 'MainInventory' and self.frame_type != 0 else self.type
+        ret = self.name
+        if self.name=="":
+            ret = self.type
+        if self.type=="":
+            ret = self.type_line
+        return ret
 
     def __eq__(self, other):
-        print(self,other)
-        if self.name != other.name:
+        """
+        An item is equal as long as it is of the instance "Item", has the same name, frame type, explicit and implicit
+        mods and the frame type matches
+        :param other: Item to compare this with
+        :return: True if equal in the specified way
+        """
+        if other == None or not isinstance(other,Item):
             return False
-        # todo: add sockets here - links & colors if needed
+        if self.name != other.name or self.type != other.type or self.type_line != other.type_line:
+            return False
+        if self.get_linked_sockets() != other.get_linked_sockets():
+            print(self.get_linked_sockets(), other.get_linked_sockets())
+
+            return False
         if self.frame_type != other.frame_type:
             return False
+        if self.explicit_mods != other.explicit_mods:
+            print(self.explicit_mods,other.explicit_mods)
+            return False
 
+        if self.implicit_mods != other.implicit_mods:
+            #todo: bubble up the changes to save it in the report
+            print(self.implicit_mods,other.implicit_mods)
+
+            return False
         return True
+
 
     def __ne__(self, other):
         return not self.__eq__(other)
